@@ -1,0 +1,45 @@
+name: Publier sur OVH
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: autofocus-ovh-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Envoyer le site vers OVH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le site
+        uses: actions/checkout@v4
+
+      - name: Installer le client FTPS
+        run: sudo apt-get install --yes lftp
+
+      - name: Publier les fichiers statiques
+        env:
+          OVH_FTP_SERVER: ${{ secrets.OVH_FTP_SERVER }}
+          OVH_FTP_PORT: ${{ secrets.OVH_FTP_PORT }}
+          OVH_FTP_USERNAME: ${{ secrets.OVH_FTP_USERNAME }}
+          OVH_FTP_PASSWORD: ${{ secrets.OVH_FTP_PASSWORD }}
+          OVH_FTP_PATH: ${{ secrets.OVH_FTP_PATH }}
+        run: |
+          lftp <<LFTP_COMMANDS
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          open --port "$OVH_FTP_PORT" "$OVH_FTP_SERVER"
+          user "$OVH_FTP_USERNAME" "$OVH_FTP_PASSWORD"
+          mirror --reverse --verbose \
+            --exclude-glob ".git*" \
+            --exclude-glob ".github*" \
+            ./ "$OVH_FTP_PATH"
+          bye
+          LFTP_COMMANDS
