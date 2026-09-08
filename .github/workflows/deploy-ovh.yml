@@ -33,7 +33,21 @@ jobs:
           OVH_FTP_PASSWORD: ${{ secrets.OVH_FTP_PASSWORD }}
           OVH_FTP_PATH: ${{ secrets.OVH_FTP_PATH }}
         run: |
-          lftp <<LFTP_COMMANDS
+          if [ "$OVH_FTP_PORT" = "22" ]; then
+            mkdir -p "$HOME/.ssh"
+            ssh-keyscan -p "$OVH_FTP_PORT" "$OVH_FTP_SERVER" >> "$HOME/.ssh/known_hosts"
+
+            lftp -u "$OVH_FTP_USERNAME,$OVH_FTP_PASSWORD" \
+              "sftp://$OVH_FTP_SERVER:$OVH_FTP_PORT" <<LFTP_COMMANDS
+          set cmd:fail-exit true
+          mirror --reverse --verbose \
+            --exclude-glob ".git*" \
+            --exclude-glob ".github*" \
+            ./ "$OVH_FTP_PATH"
+          bye
+          LFTP_COMMANDS
+          else
+            lftp <<LFTP_COMMANDS
           set cmd:fail-exit true
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
@@ -46,3 +60,4 @@ jobs:
             ./ "$OVH_FTP_PATH"
           bye
           LFTP_COMMANDS
+          fi
