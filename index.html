@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050505" />
+    <meta
+      name="description"
+      content="Autofocus crée des photos et vidéos automobiles autour de Mâcon, pour particuliers et professionnels."
+    />
+    <link rel="icon" href="assets/images/brand/favicon.png" />
+    <link
+      rel="preload"
+      href="assets/images/brand/banner.webp"
+      as="image"
+      type="image/webp"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <title>Autofocus — Photo &amp; vidéo automobile</title>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Aller au contenu</a>
+
+    <!-- EN-TÊTE : modifie ici le menu principal. -->
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="Autofocus, retour en haut">
+        <img
+          src="assets/images/brand/logo-autofocus.png"
+          alt="Autofocus"
+          width="1942"
+          height="521"
+        />
+      </a>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-nav"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+        <span class="sr-only">Ouvrir le menu</span>
+      </button>
+
+      <nav id="site-nav" class="site-nav" aria-label="Navigation principale">
+        <a href="#realisations">Réalisations</a>
+        <a href="#prestations">Prestations</a>
+        <a href="#professionnels">Professionnels</a>
+        <a href="#contact" class="nav-cta">Réserver</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- ACCUEIL -->
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-media" aria-hidden="true">
+          <img
+            src="assets/images/brand/banner.webp"
+            alt=""
+            width="2048"
+            height="819"
+          />
+        </div>
+        <div class="hero-shade"></div>
+
+        <div class="hero-content">
+          <p class="eyebrow">Photo · Vidéo · Automobile</p>
+          <h1 id="hero-title">Votre voiture.<br /><em>Son image.</em></h1>
+          <p class="hero-copy">
+            Des images qui traduisent la ligne, le mouvement et le caractère de
+            chaque automobile.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#realisations">
+              Voir les réalisations
+            </a>
+            <a class="button button-ghost" href="#contact">
+              Parler de votre projet
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-meta">
+          <span>Mâcon · Bourgogne</span>
+          <span>Déplacements sur demande</span>
+        </div>
+      </section>
+
+      <!-- APPROCHE -->
+      <section class="manifesto section-pad reveal" aria-labelledby="manifesto-title">
+        <p class="section-index">01 — L'approche</p>
+        <div class="manifesto-grid">
+          <h2 id="manifesto-title">
+            Pas seulement une belle voiture.<br />
+            <span>Une image qui marque.</span>
+          </h2>
+          <div>
+            <p>
+              Autofocus accompagne propriétaires, passionnés et professionnels
+              pour créer des contenus automobiles précis, vivants et
+              immédiatement reconnaissables.
+            </p>
+            <p class="muted">
+              Chaque séance est pensée autour du véhicule, du lieu et de l'usage
+              final : souvenir personnel, lancement, annonce, événement ou
+              communication de marque.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!--
+        GALERIE
+        Pour ajouter une photo :
+        1. Copie son fichier dans assets/images/gallery/.
+        2. Duplique un bloc <figure class="gallery-card reveal"> complet.
+        3. Change src, alt, numéro, titre et catégorie.
+        Le cadre reste automatiquement en 4:3 paysage.
+        Pour déplacer le cadrage : ajoute style="object-position: 50% 30%;" sur l'image.
+      -->
+      <section class="work" id="realisations" aria-labelledby="work-title">
+        <div class="section-head section-pad reveal">
+          <div>
+            <p class="section-index">02 — Sélection</p>
+            <h2 id="work-title">Réalisations</h2>
+          </div>
+          <p>
+            Une galerie pensée pour accueillir facilement les prochains
+            shootings Autofocus.
+          </p>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="gallery-card reveal">
+            <div class="gallery-frame">
+              <img
+                src="assets/images/gallery/mustang-face.webp"
+                alt="Mustang rouge photographiée de face de nuit"
+                width="1600"
+                height="1200"
+              />
+            </div>
+            <figcaption>
+              <span>01</span>
+              <strong>Night Drive</strong>
+              <small>Photo · Direction artistique</small>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card reveal">
+            <div class="gallery-frame">
+              <img
+                src="assets/images/gallery/mustang-arriere.webp"
+                alt="Mustang rouge photographiée de trois-quarts arrière de nuit"
+                width="1600"
+                height="1200"
+                loading="lazy"
+              />
+            </div>
+            <figcaption>
+              <span>02</span>
+              <strong>After Dark</strong>
+              <small>Photo · Ambiance</small>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card reveal">
+            <div class="gallery-frame">
+              <img
+                src="assets/images/gallery/mustang-parking.webp"
+                alt="Mustang rouge photographiée dans un parking sombre"
+                width="1600"
+                height="1200"
+                loading="lazy"
+              />
+            </div>
+            <figcaption>
+              <span>03</span>
+              <strong>Red Mustang</strong>
+              <small>Photo · Identité visuelle</small>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- PRESTATIONS : duplique une carte <article> pour ajouter une formule. -->
+      <section
+        class="services section-pad"
+        id="prestations"
+        aria-labelledby="services-title"
+      >
+        <div class="section-head reveal">
+          <div>
+            <p class="section-index">03 — Prestations</p>
+            <h2 id="services-title">Choisissez votre format</h2>
+          </div>
+          <p>
+            Trois niveaux d'accompagnement, adaptés à votre véhicule et à ce que
+            vous voulez en faire.
+          </p>
+        </div>
+
+        <div class="service-list">
+          <article class="service-card reveal">
+            <div class="service-number">01</div>
+            <div>
+              <h3>Photo</h3>
+              <p>
+                Une série cohérente pour révéler les lignes, les détails et la
+                présence de votre automobile.
+              </p>
+            </div>
+            <ul>
+              <li>Préparation de la séance</li>
+              <li>Prises de vue sur mesure</li>
+              <li>Retouches et livraison HD</li>
+            </ul>
+            <a href="#contact" data-service="Photo">
+              Choisir cette formule <span aria-hidden="true">↗</span>
+            </a>
+          </article>
+
+          <article class="service-card reveal">
+            <div class="service-number">
+              02
+              <span>Le plus choisi</span>
+            </div>
+            <div>
+              <h3>Photo + Vidéo</h3>
+              <p>
+                Un ensemble complet pour raconter votre véhicule en images fixes
+                et en mouvement.
+              </p>
+            </div>
+            <ul>
+              <li>Série photo complète</li>
+              <li>Vidéo verticale dynamique</li>
+              <li>Formats prêts pour les réseaux</li>
+            </ul>
+            <a href="#contact" data-service="Photo + Vidéo">
+              Choisir cette formule <span aria-hidden="true">↗</span>
+            </a>
+          </article>
+
+          <article class="service-card reveal">
+            <div class="service-number">03</div>
+            <div>
+              <h3>Signature</h3>
+              <p>
+                Une production plus ambitieuse, pensée autour d'un concept et
+                d'une direction visuelle forte.
+              </p>
+            </div>
+            <ul>
+              <li>Concept créatif dédié</li>
+              <li>Photo et film cinématique</li>
+              <li>Prises de vue avancées selon projet</li>
+            </ul>
+            <a href="#contact" data-service="Signature">
+              Choisir cette formule <span aria-hidden="true">↗</span>
+            </a>
+          </article>
+        </div>
+
+        <p class="pricing-note reveal">
+          Chaque véhicule et chaque projet sont différents. Le tarif est confirmé
+          après un échange rapide sur vos attentes, le lieu et les livrables.
+        </p>
+      </section>
+
+      <!-- PROFESSIONNELS -->
+      <section class="pro" id="professionnels" aria-labelledby="pro-title">
+        <img
+          src="assets/images/gallery/mustang-arriere.webp"
+          alt="Automobile photographiée par Autofocus"
+          width="1920"
+          height="1080"
+          loading="lazy"
+        />
+        <div class="pro-overlay"></div>
+        <div class="pro-content section-pad reveal">
+          <p class="section-index">04 — Professionnels</p>
+          <h2 id="pro-title">
+            Des contenus conçus pour <span>votre activité.</span>
+          </h2>
+          <p>
+            Concessions, garages, préparateurs, vendeurs, organisateurs
+            d'événements : Autofocus construit une réponse sur mesure selon vos
+            canaux, vos délais et votre volume de contenu.
+          </p>
+          <a
+            class="button button-primary"
+            href="#contact"
+            data-service="Projet professionnel"
+          >
+            Demander un devis professionnel
+          </a>
+        </div>
+      </section>
+
+      <!-- DÉROULÉ -->
+      <section class="process section-pad" aria-labelledby="process-title">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-index">05 — Déroulé</p>
+            <h2 id="process-title">Simple, du brief à la livraison</h2>
+          </div>
+        </div>
+
+        <ol class="process-grid">
+          <li class="reveal">
+            <span>01</span>
+            <h3>Échange</h3>
+            <p>Vous présentez le véhicule, vos envies et l'usage prévu des images.</p>
+          </li>
+          <li class="reveal">
+            <span>02</span>
+            <h3>Préparation</h3>
+            <p>
+              Nous validons le lieu, l'ambiance, l'horaire et le déroulé de la
+              séance.
+            </p>
+          </li>
+          <li class="reveal">
+            <span>03</span>
+            <h3>Production</h3>
+            <p>Le shooting est guidé, précis et adapté au caractère de l'automobile.</p>
+          </li>
+          <li class="reveal">
+            <span>04</span>
+            <h3>Livraison</h3>
+            <p>
+              Vous recevez des fichiers finalisés, prêts à conserver, publier ou
+              diffuser.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- CONTACT : l'adresse destinataire est dans data-recipient. -->
+      <section
+        class="contact section-pad"
+        id="contact"
+        aria-labelledby="contact-title"
+      >
+        <div class="contact-intro reveal">
+          <p class="section-index">06 — Votre projet</p>
+          <h2 id="contact-title">
+            Prêt à passer<br /><span>devant l'objectif ?</span>
+          </h2>
+          <p>
+            Complétez votre demande puis choisissez Gmail, Outlook ou votre
+            application mail. Toutes les informations seront déjà préremplies à
+            destination d'Autofocus.
+          </p>
+          <a class="instagram-link" href="mailto:autofocus71@proton.me">
+            autofocus71@proton.me <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <form
+          class="project-form reveal"
+          id="project-form"
+          data-recipient="autofocus71@proton.me"
+        >
+          <fieldset>
+            <legend>1. Votre projet</legend>
+            <div class="choice-row">
+              <label>
+                <input type="radio" name="service" value="Photo" checked />
+                <span>Photo</span>
+              </label>
+              <label>
+                <input type="radio" name="service" value="Photo + Vidéo" />
+                <span>Photo + Vidéo</span>
+              </label>
+              <label>
+                <input type="radio" name="service" value="Signature" />
+                <span>Signature</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="service"
+                  value="Projet professionnel"
+                />
+                <span>Professionnel</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>2. Votre nom *</span>
+              <input
+                name="name"
+                type="text"
+                required
+                maxlength="80"
+                autocomplete="name"
+                placeholder="Prénom et nom"
+              />
+            </label>
+            <label class="field">
+              <span>3. Votre contact *</span>
+              <input
+                name="contact"
+                type="text"
+                required
+                maxlength="120"
+                autocomplete="email"
+                placeholder="E-mail, téléphone ou Instagram"
+              />
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>4. Votre véhicule *</span>
+              <input
+                name="vehicle"
+                type="text"
+                required
+                maxlength="120"
+                placeholder="Ex. BMW M3 E46"
+              />
+            </label>
+            <label class="field">
+              <span>5. Lieu / période</span>
+              <input
+                name="locationDate"
+                type="text"
+                maxlength="160"
+                placeholder="Ex. Mâcon, courant octobre"
+              />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>6. Votre demande</span>
+            <textarea
+              name="details"
+              rows="4"
+              maxlength="1600"
+              placeholder="Ambiance, usage des images ou besoin particulier…"
+            ></textarea>
+          </label>
+
+          <div class="provider-block">
+            <p>7. Ouvrir la demande avec</p>
+            <div class="provider-actions">
+              <button
+                class="button button-primary"
+                type="button"
+                data-provider="gmail"
+              >
+                Gmail Web
+              </button>
+              <button
+                class="button button-ghost"
+                type="button"
+                data-provider="outlook"
+              >
+                Outlook Web
+              </button>
+              <button class="button button-ghost" type="submit">
+                Application mail
+              </button>
+              <button class="copy-button" type="button" data-provider="copy">
+                Copier la demande
+              </button>
+            </div>
+          </div>
+
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <img
+        src="assets/images/brand/logo-autofocus.png"
+        alt="Autofocus"
+        width="1942"
+        height="521"
+      />
+      <p>Photo &amp; vidéo automobile — Mâcon et alentours</p>
+      <div>
+        <a
+          href="https://www.instagram.com/autofocus_71/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          @autofocus_71
+        </a>
+        <a href="#top">Retour en haut ↑</a>
+      </div>
+      <small>
+        © <span data-current-year>2026</span> Autofocus. Tous droits réservés.
+      </small>
+    </footer>
+
+    <!-- JavaScript sert uniquement aux interactions, pas à écrire le contenu. -->
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
