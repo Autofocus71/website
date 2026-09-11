@@ -168,27 +168,6 @@
       );
     });
 
-  form
-    .querySelector('[data-provider="copy"]')
-    .addEventListener("click", async () => {
-      const draft = createDraft();
-
-      if (!draft) {
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(
-          `À : ${recipient}\nObjet : ${draft.subject}\n\n${draft.body}`,
-        );
-        status.textContent =
-          "Demande copiée. Vous pouvez la coller dans la messagerie de votre choix.";
-      } catch {
-        status.textContent =
-          "La copie automatique n'est pas disponible. Utilisez l'un des boutons de messagerie.";
-      }
-    });
-
   document.querySelector("[data-current-year]").textContent =
     new Date().getFullYear();
 })();
