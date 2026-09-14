@@ -184,6 +184,7 @@ textarea {
 }
 
 .hero-media {
+  inset: 82px 0 0;
   display: grid;
   place-items: center;
   background: var(--black);
@@ -191,17 +192,17 @@ textarea {
 
 .hero-media img {
   width: 100%;
-  height: 90%;
-  object-fit: contain;
-  object-position: center;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
   animation: hero-in 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .hero-shade {
   z-index: 1;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.94), rgba(0, 0, 0, 0.66) 40%, rgba(0, 0, 0, 0.12) 74%),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.76), transparent 42%);
+    linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.42) 42%, rgba(0, 0, 0, 0.08) 76%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.52), transparent 44%);
 }
 
 .hero-content {
@@ -209,7 +210,7 @@ textarea {
   z-index: 2;
   width: min(100%, var(--max-width));
   margin: 0 auto;
-  padding: 10rem clamp(1.25rem, 7vw, 7rem) 8rem;
+  padding: 9rem clamp(1.25rem, 7vw, 7rem) 10rem;
 }
 
 .eyebrow {
@@ -222,9 +223,9 @@ textarea {
 }
 
 .hero h1 {
-  max-width: 900px;
+  max-width: 1050px;
   margin: 0;
-  font-size: clamp(3.8rem, 8.5vw, 8.4rem);
+  font-size: clamp(3.8rem, 7vw, 7.2rem);
   line-height: 0.84;
   letter-spacing: -0.075em;
   text-transform: uppercase;
@@ -1225,14 +1226,18 @@ body.lightbox-open {
   }
 
   .hero {
-    min-height: 760px;
+    min-height: 100svh;
     align-items: center;
   }
 
+  .hero-media {
+    inset: 82px 0 0;
+  }
+
   .hero-media img {
-    width: 90%;
-    height: 90%;
-    object-position: center;
+    width: 100%;
+    height: 100%;
+    object-position: center 42%;
   }
 
   .hero-shade {
