@@ -487,7 +487,7 @@
 
       if (!cancelled && Math.abs(distance) >= threshold) {
         const direction = distance < 0 ? 1 : -1;
-        slideTo(activeIndex + direction, direction, distance);
+        slideTo(activeIndex + direction, direction, distance * 0.88);
       } else {
         resetDraggedImage();
       }
