@@ -185,6 +185,7 @@
     let activeIndex = 0;
     let previouslyFocused = null;
     let pointerStartX = null;
+    let imageClearTimer = null;
 
     const galleryItems = galleryCards.map((card) => {
       const detailLines = card
@@ -194,8 +195,11 @@
         .map((line) => line.trim())
         .filter(Boolean);
 
+      const thumbnail = card.querySelector(".gallery-frame img");
+
       return {
-        src: card.querySelector(".gallery-frame img").getAttribute("src"),
+        thumbnail,
+        src: thumbnail.getAttribute("src"),
         number: card.querySelector("figcaption > span").textContent.trim(),
         title: card.querySelector("figcaption strong").textContent.trim(),
         meta: detailLines[0] || "",
@@ -203,12 +207,12 @@
       };
     });
 
-    const fitStageToImage = () => {
-      if (!lightboxImage.naturalWidth || !lightboxImage.naturalHeight) {
-        return;
+    const fitStage = (naturalWidth, naturalHeight) => {
+      if (!naturalWidth || !naturalHeight) {
+        return false;
       }
 
-      const ratio = lightboxImage.naturalWidth / lightboxImage.naturalHeight;
+      const ratio = naturalWidth / naturalHeight;
       const isCompact = window.matchMedia("(max-width: 680px)").matches;
       const maxWidth = window.innerWidth - (isCompact ? 0 : 128);
       const maxHeight = window.innerHeight - (isCompact ? 0 : 64);
@@ -217,7 +221,15 @@
 
       lightboxStage.style.width = `${Math.round(width)}px`;
       lightboxStage.style.height = `${Math.round(height)}px`;
-      lightbox.classList.add("image-ready");
+      return true;
+    };
+
+    const fitStageToImage = () => {
+      if (
+        fitStage(lightboxImage.naturalWidth, lightboxImage.naturalHeight)
+      ) {
+        lightbox.classList.add("image-ready");
+      }
     };
 
     lightboxImage.addEventListener("load", fitStageToImage);
@@ -236,11 +248,13 @@
       activeIndex = (index + galleryItems.length) % galleryItems.length;
       const item = galleryItems[activeIndex];
 
-      if (animate) {
-        lightbox.classList.remove("image-ready");
-      }
-
+      lightbox.classList.remove("image-ready");
+      fitStage(item.thumbnail.naturalWidth, item.thumbnail.naturalHeight);
       lightboxImage.src = item.src;
+
+      if (lightboxImage.complete) {
+        fitStageToImage();
+      }
       lightboxNumber.textContent = item.number;
       lightboxMeta.textContent = item.meta;
       lightboxTitle.textContent = item.title;
@@ -256,6 +270,7 @@
 
     const openLightbox = (index, trigger) => {
       previouslyFocused = trigger;
+      window.clearTimeout(imageClearTimer);
       displayItem(index, false);
       lightbox.setAttribute("aria-hidden", "false");
       document.body.classList.add("lightbox-open");
@@ -268,7 +283,7 @@
       lightbox.setAttribute("aria-hidden", "true");
       document.body.classList.remove("lightbox-open");
 
-      window.setTimeout(() => {
+      imageClearTimer = window.setTimeout(() => {
         lightboxImage.removeAttribute("src");
       }, 350);
 
