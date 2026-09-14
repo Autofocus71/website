@@ -15,7 +15,7 @@
       as="image"
       type="image/webp"
     />
-    <link rel="stylesheet" href="assets/css/styles.css?v=20260914-2" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=20260914-4" />
     <title>Autofocus — Photo &amp; vidéo automobile</title>
   </head>
 
@@ -543,6 +543,65 @@
       </small>
     </footer>
 
-    <script src="assets/js/app.js"></script>
+    <div
+      class="gallery-lightbox"
+      data-gallery-lightbox
+      aria-hidden="true"
+    >
+      <div class="lightbox-backdrop" data-lightbox-backdrop></div>
+      <div
+        class="lightbox-stage"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lightbox-title"
+      >
+        <figure class="lightbox-figure">
+          <img
+            class="lightbox-image"
+            data-lightbox-image
+            decoding="async"
+            aria-hidden="true"
+          />
+          <div class="lightbox-gradient" aria-hidden="true"></div>
+          <figcaption class="lightbox-caption" aria-live="polite">
+            <p class="lightbox-kicker">
+              <span data-lightbox-number></span>
+              —
+              <span data-lightbox-meta></span>
+            </p>
+            <h2 id="lightbox-title" data-lightbox-title></h2>
+            <p class="lightbox-location" data-lightbox-location></p>
+          </figcaption>
+          <p class="lightbox-counter" data-lightbox-counter></p>
+        </figure>
+
+        <button
+          class="lightbox-control lightbox-close"
+          type="button"
+          data-lightbox-close-button
+          aria-label="Fermer la photo"
+        >
+          ×
+        </button>
+        <button
+          class="lightbox-control lightbox-previous"
+          type="button"
+          data-lightbox-previous
+          aria-label="Photo précédente"
+        >
+          ‹
+        </button>
+        <button
+          class="lightbox-control lightbox-next"
+          type="button"
+          data-lightbox-next
+          aria-label="Photo suivante"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+
+    <script src="assets/js/app.js?v=20260914-4"></script>
   </body>
 </html>
