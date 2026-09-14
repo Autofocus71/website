@@ -194,7 +194,7 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 42%;
+  object-position: center bottom;
   animation: hero-in 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
@@ -210,7 +210,7 @@ textarea {
   z-index: 2;
   width: min(100%, var(--max-width));
   margin: 0 auto;
-  padding: 9rem clamp(1.25rem, 7vw, 7rem) 10rem;
+  padding: 9rem clamp(1.25rem, 7vw, 7rem) clamp(12rem, 21vh, 15rem);
 }
 
 .eyebrow {
@@ -1237,7 +1237,7 @@ body.lightbox-open {
   .hero-media img {
     width: 100%;
     height: 100%;
-    object-position: center 42%;
+    object-position: center bottom;
   }
 
   .hero-shade {
