@@ -173,6 +173,7 @@
 
   if (lightbox && galleryCards.length) {
     const lightboxImage = lightbox.querySelector("[data-lightbox-image]");
+    const lightboxStage = lightbox.querySelector(".lightbox-stage");
     const lightboxNumber = lightbox.querySelector("[data-lightbox-number]");
     const lightboxMeta = lightbox.querySelector("[data-lightbox-meta]");
     const lightboxTitle = lightbox.querySelector("[data-lightbox-title]");
@@ -202,6 +203,26 @@
       };
     });
 
+    const fitStageToImage = () => {
+      if (!lightboxImage.naturalWidth || !lightboxImage.naturalHeight) {
+        return;
+      }
+
+      const ratio = lightboxImage.naturalWidth / lightboxImage.naturalHeight;
+      const isCompact = window.matchMedia("(max-width: 680px)").matches;
+      const maxWidth = window.innerWidth - (isCompact ? 0 : 128);
+      const maxHeight = window.innerHeight - (isCompact ? 0 : 64);
+      const width = Math.min(maxWidth, maxHeight * ratio);
+      const height = width / ratio;
+
+      lightboxStage.style.width = `${Math.round(width)}px`;
+      lightboxStage.style.height = `${Math.round(height)}px`;
+      lightbox.classList.add("image-ready");
+    };
+
+    lightboxImage.addEventListener("load", fitStageToImage);
+    window.addEventListener("resize", fitStageToImage, { passive: true });
+
     const preloadNeighbours = () => {
       [-1, 1].forEach((offset) => {
         const index =
@@ -230,7 +251,6 @@
         "0",
       )} / ${String(galleryItems.length).padStart(2, "0")}`;
 
-      requestAnimationFrame(() => lightbox.classList.add("image-ready"));
       preloadNeighbours();
     };
 
