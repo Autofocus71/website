@@ -870,7 +870,7 @@ body.lightbox-open {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: clamp(1rem, 4vw, 4rem);
+  padding: 0;
   opacity: 0;
   visibility: hidden;
   will-change: opacity;
@@ -894,6 +894,7 @@ body.lightbox-open {
 
 .lightbox-stage {
   position: relative;
+  top: -12px;
   width: min(calc(100vw - 8rem), calc((100dvh - 4rem) * 4 / 3));
   aspect-ratio: 4 / 3;
   transform: translateZ(0) scale(0.985);
@@ -922,30 +923,26 @@ body.lightbox-open {
 }
 
 .lightbox-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   opacity: 0;
-  transform: translateZ(0) scale(0.996);
-  will-change: opacity, transform;
-  transition:
-    opacity 0.18s ease-out,
-    transform 0.3s cubic-bezier(0.16, 0.8, 0.25, 1);
+  visibility: hidden;
+  transform: translateX(0);
+  will-change: transform;
+  transition: none;
+  pointer-events: none;
 }
 
 .gallery-lightbox.image-ready .lightbox-image.is-current {
   opacity: 1;
-  transform: translateZ(0) scale(1);
-}
-
-.lightbox-image.is-transition {
-  position: absolute;
-  inset: 0;
-  visibility: hidden;
-  pointer-events: none;
+  visibility: visible;
 }
 
 .lightbox-image.is-transition.is-active {
+  opacity: 1;
   visibility: visible;
 }
 

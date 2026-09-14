@@ -177,7 +177,6 @@
       "[data-lightbox-transition-image]",
     );
     const lightboxStage = lightbox.querySelector(".lightbox-stage");
-    const lightboxCaption = lightbox.querySelector(".lightbox-caption");
     const lightboxNumber = lightbox.querySelector("[data-lightbox-number]");
     const lightboxMeta = lightbox.querySelector("[data-lightbox-meta]");
     const lightboxTitle = lightbox.querySelector("[data-lightbox-title]");
@@ -225,7 +224,7 @@
       const ratio = naturalWidth / naturalHeight;
       const isCompact = window.matchMedia("(max-width: 680px)").matches;
       const maxWidth = window.innerWidth - (isCompact ? 0 : 128);
-      const maxHeight = window.innerHeight - (isCompact ? 0 : 64);
+      const maxHeight = window.innerHeight - (isCompact ? 48 : 64);
       const width = Math.min(maxWidth, maxHeight * ratio);
       const height = width / ratio;
 
@@ -282,154 +281,109 @@
       preloadNeighbours();
     };
 
-    const resetDraggedImage = () => {
-      const startTransform =
-        currentImage.style.transform || "translate3d(0, 0, 0)";
-      const animation = currentImage.animate(
-        [
-          {
-            transform: startTransform,
-            opacity: currentImage.style.opacity || "1",
-          },
-          { transform: "translate3d(0, 0, 0)", opacity: "1" },
-        ],
-        {
-          duration: 220,
-          easing: "cubic-bezier(0.2, 0.75, 0.2, 1)",
-        },
-      );
+    const motionDuration = (value) =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : value;
 
-      animation.finished.finally(() => {
-        currentImage.style.transform = "";
-        currentImage.style.opacity = "";
-      });
+    const resetDraggedImage = async () => {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      const token = ++transitionToken;
+      const image = currentImage;
+      const animation = image.animate(
+        [
+          { transform: image.style.transform || "translateX(0)" },
+          { transform: "translateX(0)" },
+        ],
+        { duration: motionDuration(200), easing: "ease-out", fill: "forwards" },
+      );
+      try {
+        await animation.finished;
+        if (token !== transitionToken) return;
+        image.style.transform = "";
+        image.style.opacity = "";
+      } catch {
+      } finally {
+        animation.cancel();
+        if (token === transitionToken) isTransitioning = false;
+      }
     };
 
-    const slideTo = (index, direction, dragStart = 0) => {
+    const slideTo = async (index, direction, dragStart = 0) => {
+      if (isTransitioning || pointerId !== null) return;
       const targetIndex = normaliseIndex(index);
-
-      if (isTransitioning || targetIndex === activeIndex) {
+      if (targetIndex === activeIndex) {
         resetDraggedImage();
         return;
       }
 
-      const token = ++transitionToken;
-      const item = galleryItems[targetIndex];
       isTransitioning = true;
-      lightboxStage.classList.remove("is-dragging");
-      transitionImage.classList.add("is-active");
-      transitionImage.draggable = false;
-      transitionImage.src = item.src;
+      const token = ++transitionToken;
+      const outgoingImage = currentImage;
+      const incomingImage = transitionImage;
+      let animations = [];
+      try {
+        incomingImage.classList.remove("is-active");
+        incomingImage.src = galleryItems[targetIndex].src;
+        incomingImage.draggable = false;
+        await incomingImage.decode();
+        if (token !== transitionToken) return;
 
-      const runTransition = () => {
-        if (token !== transitionToken) {
-          return;
-        }
-
-        fitStage(
-          transitionImage.naturalWidth,
-          transitionImage.naturalHeight,
-        );
-        const travel = lightboxStage.getBoundingClientRect().width;
-        const enteringFrom =
-          (direction > 0 ? travel : -travel) + dragStart;
-        const leavingTo = direction > 0 ? -travel : travel;
-        const duration = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches
-          ? 1
-          : 380;
+        const travel = lightboxStage.clientWidth;
+        const enter = direction * travel + dragStart;
+        incomingImage.style.transform = `translateX(${enter}px)`;
+        incomingImage.style.opacity = "1";
+        incomingImage.classList.add("is-active");
+        outgoingImage.style.opacity = "1";
         const options = {
-          duration,
-          easing: "cubic-bezier(0.22, 0.72, 0.18, 1)",
+          duration: motionDuration(320),
+          easing: "cubic-bezier(0.22, 0.68, 0.2, 1)",
           fill: "forwards",
         };
+        animations = [
+          outgoingImage.animate(
+            [
+              { transform: `translateX(${dragStart}px)` },
+              { transform: `translateX(${-direction * travel}px)` },
+            ], options,
+          ),
+          incomingImage.animate(
+            [
+              { transform: `translateX(${enter}px)` },
+              { transform: "translateX(0)" },
+            ], options,
+          ),
+        ];
+        await Promise.all(animations.map((animation) => animation.finished));
+        if (token !== transitionToken) return;
 
-        transitionImage.style.visibility = "visible";
-        transitionImage.style.opacity = "1";
-        transitionImage.style.transform = `translate3d(${enteringFrom}px, 0, 0)`;
-        currentImage.style.transform = `translate3d(${dragStart}px, 0, 0)`;
-
-        updateDetails(targetIndex);
-        lightboxCaption.animate(
-          [
-            {
-              opacity: "0.35",
-              transform: `translate3d(${direction > 0 ? 16 : -16}px, 0, 0)`,
-            },
-            { opacity: "1", transform: "translate3d(0, 0, 0)" },
-          ],
-          options,
-        );
-
-        const outgoing = currentImage.animate(
-          [
-            {
-              transform: `translate3d(${dragStart}px, 0, 0)`,
-              opacity: "1",
-            },
-            {
-              transform: `translate3d(${leavingTo}px, 0, 0)`,
-              opacity: "0.42",
-            },
-          ],
-          options,
-        );
-        const incoming = transitionImage.animate(
-          [
-            {
-              transform: `translate3d(${enteringFrom}px, 0, 0)`,
-              opacity: "0.55",
-            },
-            { transform: "translate3d(0, 0, 0)", opacity: "1" },
-          ],
-          options,
-        );
-
-        Promise.all([outgoing.finished, incoming.finished])
-          .then(() => {
-            if (token !== transitionToken) {
-              return;
-            }
-
-            const previousImage = currentImage;
-            currentImage = transitionImage;
-            transitionImage = previousImage;
-
-            transitionImage.classList.remove("is-current");
-            transitionImage.classList.add("is-transition");
-            currentImage.classList.remove("is-transition", "is-active");
-            currentImage.classList.add("is-current");
-
-            outgoing.cancel();
-            incoming.cancel();
-            transitionImage.style.transform = "";
-            transitionImage.style.opacity = "";
-            transitionImage.style.visibility = "";
-            transitionImage.removeAttribute("src");
-            currentImage.style.transform = "";
-            currentImage.style.opacity = "";
-            currentImage.style.visibility = "";
-
-            activeIndex = targetIndex;
-            isTransitioning = false;
-            preloadNeighbours();
-          })
-          .catch(() => {
-            isTransitioning = false;
+        outgoingImage.classList.remove("is-current", "is-active");
+        outgoingImage.classList.add("is-transition");
+        incomingImage.classList.remove("is-transition", "is-active");
+        incomingImage.classList.add("is-current");
+        currentImage = incomingImage;
+        transitionImage = outgoingImage;
+        activeIndex = targetIndex;
+        updateDetails(activeIndex);
+        fitStage(currentImage.naturalWidth, currentImage.naturalHeight);
+        preloadNeighbours();
+      } catch {
+        if (token === transitionToken) {
+          incomingImage.classList.remove("is-active");
+        }
+      } finally {
+        animations.forEach((animation) => animation.cancel());
+        if (token === transitionToken) {
+          [outgoingImage, incomingImage].forEach((image) => {
+            image.style.transform = "";
+            image.style.opacity = "";
           });
-      };
-
-      if (transitionImage.complete && transitionImage.naturalWidth) {
-        runTransition();
-      } else {
-        transitionImage.addEventListener("load", runTransition, {
-          once: true,
-        });
+          isTransitioning = false;
+        }
       }
     };
 
     const openLightbox = (index, trigger) => {
+      transitionToken += 1;
       previouslyFocused = trigger;
       window.clearTimeout(imageClearTimer);
       displayItem(index);
@@ -443,7 +397,11 @@
     const closeLightbox = () => {
       transitionToken += 1;
       isTransitioning = false;
+      const capturedPointer = pointerId;
       pointerId = null;
+      if (capturedPointer !== null && lightboxStage.hasPointerCapture(capturedPointer)) {
+        lightboxStage.releasePointerCapture(capturedPointer);
+      }
       lightbox.classList.remove("is-open", "image-ready");
       lightboxStage.classList.remove("is-dragging");
       lightbox.setAttribute("aria-hidden", "true");
@@ -466,6 +424,12 @@
         previouslyFocused.focus();
       }
     };
+
+    window.addEventListener("resize", () => {
+      if (lightbox.classList.contains("is-open") && !isTransitioning) {
+        revealCurrentImage();
+      }
+    });
 
     const finishPointerGesture = (event, cancelled = false) => {
       if (pointerId !== event.pointerId) {
@@ -529,6 +493,8 @@
     lightboxStage.addEventListener("pointerdown", (event) => {
       if (
         isTransitioning ||
+        pointerId !== null ||
+        !event.isPrimary ||
         event.button !== 0 ||
         event.target.closest(".lightbox-control")
       ) {
@@ -550,13 +516,8 @@
       dragDistance = event.clientX - pointerStartX;
       const resistance = 0.88;
       const offset = dragDistance * resistance;
-      const progress = Math.min(
-        Math.abs(offset) / lightboxStage.getBoundingClientRect().width,
-        1,
-      );
-
       currentImage.style.transform = `translate3d(${offset}px, 0, 0)`;
-      currentImage.style.opacity = String(1 - progress * 0.3);
+
     });
 
     lightboxStage.addEventListener("pointerup", (event) =>
