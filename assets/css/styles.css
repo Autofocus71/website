@@ -210,7 +210,7 @@ textarea {
   z-index: 2;
   width: min(100%, var(--max-width));
   margin: 0 auto;
-  padding: 9rem clamp(1.25rem, 7vw, 7rem) clamp(12rem, 21vh, 15rem);
+  padding: 9rem clamp(1.25rem, 7vw, 7rem) clamp(14rem, 24vh, 18rem);
 }
 
 .eyebrow {
@@ -1245,7 +1245,7 @@ body.lightbox-open {
   }
 
   .hero-content {
-    padding: 8rem 1.25rem 6rem;
+    padding: 8rem 1.25rem 8rem;
   }
 
   .hero h1 {
