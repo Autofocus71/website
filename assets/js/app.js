@@ -244,7 +244,7 @@
       });
     };
 
-    const displayItem = (index, animate = true) => {
+    const displayItem = (index) => {
       activeIndex = (index + galleryItems.length) % galleryItems.length;
       const item = galleryItems[activeIndex];
 
@@ -271,10 +271,11 @@
     const openLightbox = (index, trigger) => {
       previouslyFocused = trigger;
       window.clearTimeout(imageClearTimer);
-      displayItem(index, false);
+      displayItem(index);
       lightbox.setAttribute("aria-hidden", "false");
       document.body.classList.add("lightbox-open");
-      requestAnimationFrame(() => lightbox.classList.add("is-open"));
+      lightbox.getBoundingClientRect();
+      lightbox.classList.add("is-open");
       closeButton.focus();
     };
 
