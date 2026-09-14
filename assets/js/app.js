@@ -172,8 +172,12 @@
   const lightbox = document.querySelector("[data-gallery-lightbox]");
 
   if (lightbox && galleryCards.length) {
-    const lightboxImage = lightbox.querySelector("[data-lightbox-image]");
+    let currentImage = lightbox.querySelector("[data-lightbox-image]");
+    let transitionImage = lightbox.querySelector(
+      "[data-lightbox-transition-image]",
+    );
     const lightboxStage = lightbox.querySelector(".lightbox-stage");
+    const lightboxCaption = lightbox.querySelector(".lightbox-caption");
     const lightboxNumber = lightbox.querySelector("[data-lightbox-number]");
     const lightboxMeta = lightbox.querySelector("[data-lightbox-meta]");
     const lightboxTitle = lightbox.querySelector("[data-lightbox-title]");
@@ -184,8 +188,12 @@
     const nextButton = lightbox.querySelector("[data-lightbox-next]");
     let activeIndex = 0;
     let previouslyFocused = null;
-    let pointerStartX = null;
+    let pointerId = null;
+    let pointerStartX = 0;
+    let dragDistance = 0;
+    let isTransitioning = false;
     let imageClearTimer = null;
+    let transitionToken = 0;
 
     const galleryItems = galleryCards.map((card) => {
       const detailLines = card
@@ -194,7 +202,6 @@
         .split(/\n+/)
         .map((line) => line.trim())
         .filter(Boolean);
-
       const thumbnail = card.querySelector(".gallery-frame img");
 
       return {
@@ -206,6 +213,9 @@
         location: detailLines.slice(1).join(" · "),
       };
     });
+
+    const normaliseIndex = (index) =>
+      (index + galleryItems.length) % galleryItems.length;
 
     const fitStage = (naturalWidth, naturalHeight) => {
       if (!naturalWidth || !naturalHeight) {
@@ -224,48 +234,199 @@
       return true;
     };
 
-    const fitStageToImage = () => {
-      if (
-        fitStage(lightboxImage.naturalWidth, lightboxImage.naturalHeight)
-      ) {
-        lightbox.classList.add("image-ready");
-      }
-    };
-
-    lightboxImage.addEventListener("load", fitStageToImage);
-    window.addEventListener("resize", fitStageToImage, { passive: true });
-
-    const preloadNeighbours = () => {
-      [-1, 1].forEach((offset) => {
-        const index =
-          (activeIndex + offset + galleryItems.length) % galleryItems.length;
-        const image = new Image();
-        image.src = galleryItems[index].src;
-      });
-    };
-
-    const displayItem = (index) => {
-      activeIndex = (index + galleryItems.length) % galleryItems.length;
-      const item = galleryItems[activeIndex];
-
-      lightbox.classList.remove("image-ready");
-      fitStage(item.thumbnail.naturalWidth, item.thumbnail.naturalHeight);
-      lightboxImage.src = item.src;
-
-      if (lightboxImage.complete) {
-        fitStageToImage();
-      }
+    const updateDetails = (index) => {
+      const item = galleryItems[index];
       lightboxNumber.textContent = item.number;
       lightboxMeta.textContent = item.meta;
       lightboxTitle.textContent = item.title;
       lightboxLocation.textContent = item.location;
       lightboxLocation.hidden = !item.location;
-      lightboxCounter.textContent = `${String(activeIndex + 1).padStart(
+      lightboxCounter.textContent = `${String(index + 1).padStart(
         2,
         "0",
       )} / ${String(galleryItems.length).padStart(2, "0")}`;
+    };
+
+    const preloadNeighbours = () => {
+      [-1, 1].forEach((offset) => {
+        const index = normaliseIndex(activeIndex + offset);
+        const image = new Image();
+        image.src = galleryItems[index].src;
+      });
+    };
+
+    const revealCurrentImage = () => {
+      if (fitStage(currentImage.naturalWidth, currentImage.naturalHeight)) {
+        lightbox.classList.add("image-ready");
+      }
+    };
+
+    const displayItem = (index) => {
+      activeIndex = normaliseIndex(index);
+      const item = galleryItems[activeIndex];
+
+      lightbox.classList.remove("image-ready");
+      fitStage(item.thumbnail.naturalWidth, item.thumbnail.naturalHeight);
+      currentImage.src = item.src;
+      currentImage.draggable = false;
+      updateDetails(activeIndex);
+
+      if (currentImage.complete && currentImage.naturalWidth) {
+        revealCurrentImage();
+      } else {
+        currentImage.addEventListener("load", revealCurrentImage, {
+          once: true,
+        });
+      }
 
       preloadNeighbours();
+    };
+
+    const resetDraggedImage = () => {
+      const startTransform =
+        currentImage.style.transform || "translate3d(0, 0, 0)";
+      const animation = currentImage.animate(
+        [
+          {
+            transform: startTransform,
+            opacity: currentImage.style.opacity || "1",
+          },
+          { transform: "translate3d(0, 0, 0)", opacity: "1" },
+        ],
+        {
+          duration: 220,
+          easing: "cubic-bezier(0.2, 0.75, 0.2, 1)",
+        },
+      );
+
+      animation.finished.finally(() => {
+        currentImage.style.transform = "";
+        currentImage.style.opacity = "";
+      });
+    };
+
+    const slideTo = (index, direction, dragStart = 0) => {
+      const targetIndex = normaliseIndex(index);
+
+      if (isTransitioning || targetIndex === activeIndex) {
+        resetDraggedImage();
+        return;
+      }
+
+      const token = ++transitionToken;
+      const item = galleryItems[targetIndex];
+      isTransitioning = true;
+      lightboxStage.classList.remove("is-dragging");
+      transitionImage.classList.add("is-active");
+      transitionImage.draggable = false;
+      transitionImage.src = item.src;
+
+      const runTransition = () => {
+        if (token !== transitionToken) {
+          return;
+        }
+
+        fitStage(
+          transitionImage.naturalWidth,
+          transitionImage.naturalHeight,
+        );
+        const travel = lightboxStage.getBoundingClientRect().width;
+        const enteringFrom =
+          (direction > 0 ? travel : -travel) + dragStart;
+        const leavingTo = direction > 0 ? -travel : travel;
+        const duration = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches
+          ? 1
+          : 380;
+        const options = {
+          duration,
+          easing: "cubic-bezier(0.22, 0.72, 0.18, 1)",
+          fill: "forwards",
+        };
+
+        transitionImage.style.visibility = "visible";
+        transitionImage.style.opacity = "1";
+        transitionImage.style.transform = `translate3d(${enteringFrom}px, 0, 0)`;
+        currentImage.style.transform = `translate3d(${dragStart}px, 0, 0)`;
+
+        updateDetails(targetIndex);
+        lightboxCaption.animate(
+          [
+            {
+              opacity: "0.35",
+              transform: `translate3d(${direction > 0 ? 16 : -16}px, 0, 0)`,
+            },
+            { opacity: "1", transform: "translate3d(0, 0, 0)" },
+          ],
+          options,
+        );
+
+        const outgoing = currentImage.animate(
+          [
+            {
+              transform: `translate3d(${dragStart}px, 0, 0)`,
+              opacity: "1",
+            },
+            {
+              transform: `translate3d(${leavingTo}px, 0, 0)`,
+              opacity: "0.42",
+            },
+          ],
+          options,
+        );
+        const incoming = transitionImage.animate(
+          [
+            {
+              transform: `translate3d(${enteringFrom}px, 0, 0)`,
+              opacity: "0.55",
+            },
+            { transform: "translate3d(0, 0, 0)", opacity: "1" },
+          ],
+          options,
+        );
+
+        Promise.all([outgoing.finished, incoming.finished])
+          .then(() => {
+            if (token !== transitionToken) {
+              return;
+            }
+
+            const previousImage = currentImage;
+            currentImage = transitionImage;
+            transitionImage = previousImage;
+
+            transitionImage.classList.remove("is-current");
+            transitionImage.classList.add("is-transition");
+            currentImage.classList.remove("is-transition", "is-active");
+            currentImage.classList.add("is-current");
+
+            outgoing.cancel();
+            incoming.cancel();
+            transitionImage.style.transform = "";
+            transitionImage.style.opacity = "";
+            transitionImage.style.visibility = "";
+            transitionImage.removeAttribute("src");
+            currentImage.style.transform = "";
+            currentImage.style.opacity = "";
+            currentImage.style.visibility = "";
+
+            activeIndex = targetIndex;
+            isTransitioning = false;
+            preloadNeighbours();
+          })
+          .catch(() => {
+            isTransitioning = false;
+          });
+      };
+
+      if (transitionImage.complete && transitionImage.naturalWidth) {
+        runTransition();
+      } else {
+        transitionImage.addEventListener("load", runTransition, {
+          once: true,
+        });
+      }
     };
 
     const openLightbox = (index, trigger) => {
@@ -280,16 +441,55 @@
     };
 
     const closeLightbox = () => {
+      transitionToken += 1;
+      isTransitioning = false;
+      pointerId = null;
       lightbox.classList.remove("is-open", "image-ready");
+      lightboxStage.classList.remove("is-dragging");
       lightbox.setAttribute("aria-hidden", "true");
       document.body.classList.remove("lightbox-open");
 
+      [currentImage, transitionImage].forEach((image) => {
+        image.getAnimations().forEach((animation) => animation.cancel());
+        image.style.transform = "";
+        image.style.opacity = "";
+        image.style.visibility = "";
+      });
+      transitionImage.classList.remove("is-active");
+
       imageClearTimer = window.setTimeout(() => {
-        lightboxImage.removeAttribute("src");
+        currentImage.removeAttribute("src");
+        transitionImage.removeAttribute("src");
       }, 350);
 
       if (previouslyFocused) {
         previouslyFocused.focus();
+      }
+    };
+
+    const finishPointerGesture = (event, cancelled = false) => {
+      if (pointerId !== event.pointerId) {
+        return;
+      }
+
+      if (lightboxStage.hasPointerCapture(pointerId)) {
+        lightboxStage.releasePointerCapture(pointerId);
+      }
+
+      const distance = dragDistance;
+      const threshold = Math.min(
+        110,
+        lightboxStage.getBoundingClientRect().width * 0.12,
+      );
+      pointerId = null;
+      dragDistance = 0;
+      lightboxStage.classList.remove("is-dragging");
+
+      if (!cancelled && Math.abs(distance) >= threshold) {
+        const direction = distance < 0 ? 1 : -1;
+        slideTo(activeIndex + direction, direction, distance);
+      } else {
+        resetDraggedImage();
       }
     };
 
@@ -311,9 +511,11 @@
 
     closeButton.addEventListener("click", closeLightbox);
     previousButton.addEventListener("click", () =>
-      displayItem(activeIndex - 1),
+      slideTo(activeIndex - 1, -1),
     );
-    nextButton.addEventListener("click", () => displayItem(activeIndex + 1));
+    nextButton.addEventListener("click", () =>
+      slideTo(activeIndex + 1, 1),
+    );
 
     lightbox.addEventListener("click", (event) => {
       if (
@@ -324,22 +526,45 @@
       }
     });
 
-    lightbox.addEventListener("pointerdown", (event) => {
-      pointerStartX = event.clientX;
-    });
-
-    lightbox.addEventListener("pointerup", (event) => {
-      if (pointerStartX === null) {
+    lightboxStage.addEventListener("pointerdown", (event) => {
+      if (
+        isTransitioning ||
+        event.button !== 0 ||
+        event.target.closest(".lightbox-control")
+      ) {
         return;
       }
 
-      const distance = event.clientX - pointerStartX;
-      pointerStartX = null;
-
-      if (Math.abs(distance) > 60) {
-        displayItem(activeIndex + (distance < 0 ? 1 : -1));
-      }
+      pointerId = event.pointerId;
+      pointerStartX = event.clientX;
+      dragDistance = 0;
+      lightboxStage.setPointerCapture(pointerId);
+      lightboxStage.classList.add("is-dragging");
     });
+
+    lightboxStage.addEventListener("pointermove", (event) => {
+      if (pointerId !== event.pointerId) {
+        return;
+      }
+
+      dragDistance = event.clientX - pointerStartX;
+      const resistance = 0.88;
+      const offset = dragDistance * resistance;
+      const progress = Math.min(
+        Math.abs(offset) / lightboxStage.getBoundingClientRect().width,
+        1,
+      );
+
+      currentImage.style.transform = `translate3d(${offset}px, 0, 0)`;
+      currentImage.style.opacity = String(1 - progress * 0.3);
+    });
+
+    lightboxStage.addEventListener("pointerup", (event) =>
+      finishPointerGesture(event),
+    );
+    lightboxStage.addEventListener("pointercancel", (event) =>
+      finishPointerGesture(event, true),
+    );
 
     document.addEventListener("keydown", (event) => {
       if (!lightbox.classList.contains("is-open")) {
@@ -349,13 +574,13 @@
       if (event.key === "Escape") {
         closeLightbox();
       } else if (event.key === "ArrowLeft") {
-        displayItem(activeIndex - 1);
+        slideTo(activeIndex - 1, -1);
       } else if (event.key === "ArrowRight") {
-        displayItem(activeIndex + 1);
+        slideTo(activeIndex + 1, 1);
       } else if (event.key === "Home") {
-        displayItem(0);
+        slideTo(0, -1);
       } else if (event.key === "End") {
-        displayItem(galleryItems.length - 1);
+        slideTo(galleryItems.length - 1, 1);
       } else if (event.key === "Tab") {
         const controls = [closeButton, previousButton, nextButton];
         const currentIndex = controls.indexOf(document.activeElement);
