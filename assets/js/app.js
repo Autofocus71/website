@@ -284,33 +284,96 @@
     const motionDuration = (value) =>
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : value;
 
+    const nextFrame = () =>
+      new Promise((resolve) => {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(resolve);
+        });
+      });
+
+    const loadImage = (image, src) =>
+      new Promise((resolve, reject) => {
+        const onLoad = () => {
+          cleanup();
+          resolve();
+        };
+        const onError = () => {
+          cleanup();
+          reject(new Error("Image loading failed"));
+        };
+        const cleanup = () => {
+          image.removeEventListener("load", onLoad);
+          image.removeEventListener("error", onError);
+        };
+
+        image.addEventListener("load", onLoad);
+        image.addEventListener("error", onError);
+        image.src = src;
+
+        if (image.complete && image.naturalWidth) {
+          cleanup();
+          resolve();
+        }
+      });
+
+    const transitionTransform = async (image, from, to, duration) => {
+      image.style.transition = "none";
+      image.style.transform = from;
+
+      if (!duration) {
+        image.style.transform = to;
+        return;
+      }
+
+      image.getBoundingClientRect();
+      await nextFrame();
+
+      await new Promise((resolve) => {
+        let timer;
+        const finish = (event) => {
+          if (event && event.propertyName !== "transform") {
+            return;
+          }
+          image.removeEventListener("transitionend", finish);
+          window.clearTimeout(timer);
+          resolve();
+        };
+
+        image.addEventListener("transitionend", finish);
+        timer = window.setTimeout(finish, duration + 100);
+        image.style.transition =
+          `transform ${duration}ms cubic-bezier(0.22, 0.68, 0.2, 1)`;
+        image.style.transform = to;
+      });
+    };
+
     const resetDraggedImage = async () => {
       if (isTransitioning) return;
       isTransitioning = true;
       const token = ++transitionToken;
       const image = currentImage;
-      const animation = image.animate(
-        [
-          { transform: image.style.transform || "translateX(0)" },
-          { transform: "translateX(0)" },
-        ],
-        { duration: motionDuration(200), easing: "ease-out", fill: "forwards" },
-      );
+
       try {
-        await animation.finished;
-        if (token !== transitionToken) return;
-        image.style.transform = "";
-        image.style.opacity = "";
-      } catch {
+        await transitionTransform(
+          image,
+          image.style.transform || "translate3d(0, 0, 0)",
+          "translate3d(0, 0, 0)",
+          motionDuration(200),
+        );
       } finally {
-        animation.cancel();
-        if (token === transitionToken) isTransitioning = false;
+        image.style.transition = "";
+        if (token === transitionToken) {
+          image.style.transform = "";
+          image.style.opacity = "";
+          isTransitioning = false;
+        }
       }
     };
 
     const slideTo = async (index, direction, dragStart = 0) => {
       if (isTransitioning || pointerId !== null) return;
       const targetIndex = normaliseIndex(index);
+
       if (targetIndex === activeIndex) {
         resetDraggedImage();
         return;
@@ -320,46 +383,45 @@
       const token = ++transitionToken;
       const outgoingImage = currentImage;
       const incomingImage = transitionImage;
-      let animations = [];
+
       try {
         incomingImage.classList.remove("is-active");
-        incomingImage.src = galleryItems[targetIndex].src;
         incomingImage.draggable = false;
-        await incomingImage.decode();
+        await loadImage(incomingImage, galleryItems[targetIndex].src);
+
         if (token !== transitionToken) return;
 
         const travel = lightboxStage.clientWidth;
-        const enter = direction * travel + dragStart;
-        incomingImage.style.transform = `translateX(${enter}px)`;
+        const outgoingStart = dragStart;
+        const incomingStart = direction * travel + dragStart;
+        const duration = motionDuration(320);
+
         incomingImage.style.opacity = "1";
         incomingImage.classList.add("is-active");
         outgoingImage.style.opacity = "1";
-        const options = {
-          duration: motionDuration(320),
-          easing: "cubic-bezier(0.22, 0.68, 0.2, 1)",
-          fill: "forwards",
-        };
-        animations = [
-          outgoingImage.animate(
-            [
-              { transform: `translateX(${dragStart}px)` },
-              { transform: `translateX(${-direction * travel}px)` },
-            ], options,
+
+        await Promise.all([
+          transitionTransform(
+            outgoingImage,
+            `translate3d(${outgoingStart}px, 0, 0)`,
+            `translate3d(${-direction * travel}px, 0, 0)`,
+            duration,
           ),
-          incomingImage.animate(
-            [
-              { transform: `translateX(${enter}px)` },
-              { transform: "translateX(0)" },
-            ], options,
+          transitionTransform(
+            incomingImage,
+            `translate3d(${incomingStart}px, 0, 0)`,
+            "translate3d(0, 0, 0)",
+            duration,
           ),
-        ];
-        await Promise.all(animations.map((animation) => animation.finished));
+        ]);
+
         if (token !== transitionToken) return;
 
         outgoingImage.classList.remove("is-current", "is-active");
         outgoingImage.classList.add("is-transition");
         incomingImage.classList.remove("is-transition", "is-active");
         incomingImage.classList.add("is-current");
+
         currentImage = incomingImage;
         transitionImage = outgoingImage;
         activeIndex = targetIndex;
@@ -371,12 +433,13 @@
           incomingImage.classList.remove("is-active");
         }
       } finally {
-        animations.forEach((animation) => animation.cancel());
+        [outgoingImage, incomingImage].forEach((image) => {
+          image.style.transition = "";
+          image.style.transform = "";
+          image.style.opacity = "";
+        });
+
         if (token === transitionToken) {
-          [outgoingImage, incomingImage].forEach((image) => {
-            image.style.transform = "";
-            image.style.opacity = "";
-          });
           isTransitioning = false;
         }
       }
