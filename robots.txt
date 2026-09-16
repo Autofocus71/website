@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://autofocus71.fr/sitemap.xml
