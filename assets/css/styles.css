@@ -190,12 +190,24 @@ textarea {
   background: var(--black);
 }
 
-.hero-media img {
+.hero-media img,
+.hero-media video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center bottom;
+  pointer-events: none;
   animation: hero-in 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.hero-media video {
+  z-index: 1;
+}
+
+.hero-poster {
+  z-index: 0;
 }
 
 .hero-shade {
@@ -1359,6 +1371,10 @@ body.lightbox-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-media video {
+    display: none;
+  }
+
   html {
     scroll-behavior: auto;
   }
