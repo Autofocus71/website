@@ -328,17 +328,9 @@ textarea:focus-visible {
 }
 
 .manifesto > .section-background {
+  z-index: -2;
   object-fit: cover;
   opacity: 0.48;
-}
-
-.manifesto > .section-poster {
-  z-index: -3;
-}
-
-.manifesto > .section-video {
-  z-index: -2;
-  pointer-events: none;
 }
 
 .manifesto > .section-overlay {
@@ -1367,10 +1359,6 @@ body.lightbox-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .section-video {
-    display: none;
-  }
-
   html {
     scroll-behavior: auto;
   }
